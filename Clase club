@@ -1,0 +1,121 @@
+package club;
+
+import java.util.ArrayList;
+import club.Socio.Tipo;
+
+public class Club {
+
+    public final static int MAXIMO_VIP = 3;
+
+    private ArrayList<Socio> socios;
+
+    public Club() {
+        socios = new ArrayList<>();
+    }
+
+    public ArrayList<Socio> darSocios() {
+        return socios;
+    }
+
+    public void afiliarSocio(String cedula, String nombre, Tipo tipo) throws Exception {
+        if (buscarSocio(cedula) != null)
+            throw new Exception("El socio ya existe.");
+
+        if (tipo == Tipo.VIP && contarSociosVIP() >= MAXIMO_VIP)
+            throw new Exception("No se permiten más VIP.");
+
+        socios.add(new Socio(cedula, nombre, tipo));
+    }
+
+    public Socio buscarSocio(String cedula) {
+        for (Socio s : socios)
+            if (s.darCedula().equals(cedula))
+                return s;
+        return null;
+    }
+
+    public int contarSociosVIP() {
+        int count = 0;
+        for (Socio s : socios)
+            if (s.darTipo() == Tipo.VIP)
+                count++;
+        return count;
+    }
+
+    public ArrayList<String> darAutorizadosSocio(String cedula) throws Exception {
+        Socio s = buscarSocio(cedula);
+
+        if (s == null) throw new Exception("Socio no existe.");
+
+        ArrayList<String> lista = new ArrayList<>();
+        lista.add(s.darNombre());
+        lista.addAll(s.darAutorizados());
+
+        return lista;
+    }
+
+    public void agregarAutorizadoSocio(String cedula, String nombre) throws Exception {
+        Socio s = buscarSocio(cedula);
+        if (s == null) throw new Exception("Socio no existe.");
+
+        s.agregarAutorizado(nombre);
+    }
+
+    public void registrarConsumo(String cedula, String cliente, String concepto, double valor) throws Exception {
+        Socio s = buscarSocio(cedula);
+        if (s == null) throw new Exception("Socio no existe.");
+
+        if (!darAutorizadosSocio(cedula).contains(cliente))
+            throw new Exception("Cliente no autorizado.");
+
+        s.registrarConsumo(cliente, concepto, valor);
+    }
+
+    public ArrayList<Factura> darFacturasSocio(String cedula) throws Exception {
+        Socio s = buscarSocio(cedula);
+        if (s == null) throw new Exception("Socio no existe.");
+
+        return s.darFacturas();
+    }
+
+    public void pagarFacturaSocio(String cedula, int indice) throws Exception {
+        Socio s = buscarSocio(cedula);
+        if (s == null) throw new Exception("Socio no existe.");
+
+        s.pagarFactura(indice);
+    }
+
+    public void aumentarFondosSocio(String cedula, double monto) throws Exception {
+        Socio s = buscarSocio(cedula);
+        if (s == null) throw new Exception("Socio no existe.");
+
+        s.aumentarFondos(monto);
+    }
+
+    public double obtenerTotalConsumosSocio(String cedula) throws Exception {
+        Socio s = buscarSocio(cedula);
+        if (s == null) throw new Exception("Socio no existe.");
+
+        double total = 0;
+        for (Factura f : s.darFacturas())
+            total += f.darValor();
+
+        return total;
+    }
+
+    public boolean sePuedeEliminarSocio(String cedula) throws Exception {
+        Socio s = buscarSocio(cedula);
+
+        if (s == null) throw new Exception("No existe el socio.");
+        if (s.darTipo() == Tipo.VIP) throw new Exception("No se puede eliminar VIP.");
+        if (!s.darFacturas().isEmpty()) throw new Exception("Tiene facturas.");
+        if (s.darAutorizados().size() > 1) throw new Exception("Más de un autorizado.");
+
+        return true;
+    }
+
+    public void eliminarSocio(String cedula) {
+        Socio s = buscarSocio(cedula);
+        if (s != null) socios.remove(s);
+    }
+}
