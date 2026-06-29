@@ -1,0 +1,213 @@
+package club;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+import club.Socio.Tipo;
+
+public class Main {
+
+    private static Club club = new Club();
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        boolean salir = false;
+
+        while (!salir) {
+
+            mostrarMenu();
+
+            try {
+                int opcion = Integer.parseInt(scanner.nextLine());
+
+                switch (opcion) {
+                    case 1: afiliarSocio(); break;
+                    case 2: registrarAutorizado(); break;
+                    case 3: registrarConsumo(); break;
+                    case 4: pagarFactura(); break;
+                    case 5: aumentarFondos(); break;
+                    case 6: consultarTotalConsumos(); break;
+                    case 7: eliminarSocio(); break;
+                    case 8: listarSocios(); break;
+                    case 9:
+                        salir = true;
+                        System.out.println("Saliendo...");
+                        break;
+                    default:
+                        System.out.println("Opción inválida.");
+                }
+
+            } catch (NumberFormatException e) {
+                System.out.println("Debe ingresar un número válido.");
+            }
+
+            System.out.println("----------------------");
+        }
+    }
+
+    private static void mostrarMenu() {
+        System.out.println("\n1. Afiliar socio");
+        System.out.println("2. Registrar autorizado");
+        System.out.println("3. Registrar consumo");
+        System.out.println("4. Pagar factura");
+        System.out.println("5. Aumentar fondos");
+        System.out.println("6. Total consumos");
+        System.out.println("7. Eliminar socio");
+        System.out.println("8. Listar socios");
+        System.out.println("9. Salir");
+        System.out.print("Opción: ");
+    }
+
+    private static void afiliarSocio() {
+        try {
+            System.out.print("Cédula: ");
+            String cedula = scanner.nextLine();
+
+            System.out.print("Nombre: ");
+            String nombre = scanner.nextLine();
+
+            System.out.print("Tipo (1 VIP / 2 REGULAR): ");
+            int tipoNum = Integer.parseInt(scanner.nextLine());
+
+            Tipo tipo = (tipoNum == 1) ? Tipo.VIP : Tipo.REGULAR;
+
+            club.afiliarSocio(cedula, nombre, tipo);
+
+            System.out.println("Socio creado.");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void registrarAutorizado() {
+        try {
+            System.out.print("Cédula socio: ");
+            String cedula = scanner.nextLine();
+
+            System.out.print("Nombre autorizado: ");
+            String nombre = scanner.nextLine();
+
+            club.agregarAutorizadoSocio(cedula, nombre);
+
+            System.out.println("Autorizado agregado.");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void registrarConsumo() {
+        try {
+            System.out.print("Cédula socio: ");
+            String cedula = scanner.nextLine();
+
+            System.out.print("Nombre cliente: ");
+            String cliente = scanner.nextLine();
+
+            System.out.print("Concepto: ");
+            String concepto = scanner.nextLine();
+
+            System.out.print("Valor: ");
+            double valor = Double.parseDouble(scanner.nextLine());
+
+            club.registrarConsumo(cedula, cliente, concepto, valor);
+
+            System.out.println("Consumo registrado.");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void pagarFactura() {
+        try {
+            System.out.print("Cédula: ");
+            String cedula = scanner.nextLine();
+
+            ArrayList<Factura> facturas = club.darFacturasSocio(cedula);
+
+            if (facturas.isEmpty()) {
+                System.out.println("No tiene facturas.");
+                return;
+            }
+
+            for (int i = 0; i < facturas.size(); i++) {
+                System.out.println(i + ": " + facturas.get(i));
+            }
+
+            System.out.print("Índice a pagar: ");
+            int indice = Integer.parseInt(scanner.nextLine());
+
+            club.pagarFacturaSocio(cedula, indice);
+
+            System.out.println("Factura pagada.");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void aumentarFondos() {
+        try {
+            System.out.print("Cédula: ");
+            String cedula = scanner.nextLine();
+
+            System.out.print("Monto: ");
+            double monto = Double.parseDouble(scanner.nextLine());
+
+            club.aumentarFondosSocio(cedula, monto);
+
+            System.out.println("Fondos agregados.");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void consultarTotalConsumos() {
+        try {
+            System.out.print("Cédula: ");
+            String cedula = scanner.nextLine();
+
+            double total = club.obtenerTotalConsumosSocio(cedula);
+
+            System.out.println("Total consumos: $" + total);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void eliminarSocio() {
+        try {
+            System.out.print("Cédula: ");
+            String cedula = scanner.nextLine();
+
+            if (club.sePuedeEliminarSocio(cedula)) {
+                club.eliminarSocio(cedula);
+                System.out.println("Socio eliminado.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void listarSocios() {
+        ArrayList<Socio> socios = club.darSocios();
+
+        if (socios.isEmpty()) {
+            System.out.println("No hay socios.");
+            return;
+        }
+
+        for (Socio s : socios) {
+            System.out.println(
+                s.darNombre() + " | " +
+                s.darCedula() + " | " +
+                s.darTipo() + " | $" +
+                s.darFondos()
+            );
+        }
+    }
+}
